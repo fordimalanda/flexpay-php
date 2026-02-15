@@ -6,6 +6,7 @@ namespace Devscast\Flexpay\Request;
 
 use Devscast\Flexpay\Data\Currency;
 use Devscast\Flexpay\Data\Type;
+use Override;
 use Webmozart\Assert\Assert;
 
 /**
@@ -32,7 +33,10 @@ final class MobileRequest extends Request
         parent::__construct($amount, $reference, $currency, $callbackUrl, $approveUrl, $description, $cancelUrl, $declineUrl);
     }
 
-    #[\Override]
+    /**
+     * @return array<string, float|string|int|null>
+     */
+    #[Override]
     public function getPayload(): array
     {
         return [

@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace Devscast\Flexpay\Exception;
 
+use Exception;
+
 /**
  * Class NetworkException.
  *
@@ -11,7 +13,7 @@ namespace Devscast\Flexpay\Exception;
  * @template T
  * @phpstan-template T
  */
-class NetworkException extends \Exception
+class NetworkException extends Exception
 {
     public function __construct(
         string $message,
@@ -27,7 +29,7 @@ class NetworkException extends \Exception
 
     public static function create(string $message, string $type, int $status): self
     {
-        $message = empty($message) ? 'No message was provided' : $message;
+        $message = $message === '' || $message === '0' ? 'No message was provided' : $message;
         return match (true) {
             $status === 401 || $status === 429 => new AccountException($message, $type, $status),
             $status >= 400 && $status <= 499 => new ClientException($message, $type, $status),

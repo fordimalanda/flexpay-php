@@ -28,6 +28,9 @@ final class PayoutRequest extends Request
         parent::__construct($amount, $reference, $currency, $callbackUrl);
     }
 
+    /**
+     * @return array<string, float|string|null|int>
+     */
     public function getPayload(): array
     {
         return [

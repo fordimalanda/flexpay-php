@@ -18,6 +18,7 @@ use Devscast\Flexpay\Response\CheckResponse;
 use Devscast\Flexpay\Response\PaymentResponse;
 use Devscast\Flexpay\Response\PayoutResponse;
 use PHPUnit\Framework\TestCase;
+use ReflectionClass;
 use Symfony\Component\HttpClient\MockHttpClient;
 use Symfony\Component\HttpClient\Response\MockResponse;
 
@@ -116,7 +117,7 @@ final class ClientTest extends TestCase
     public function testHandleCallback(): void
     {
         /** @var array $data */
-        $data = json_decode(file_get_contents(__DIR__ . '/fixtures/response_success.json'), true);
+        $data = json_decode((string) file_get_contents(__DIR__ . '/fixtures/response_success.json'), true);
         $flexpay = $this->getFlexpay($this->getResponse('response_success.json'));
 
         $response = $flexpay->handleCallback($data);
@@ -129,17 +130,39 @@ final class ClientTest extends TestCase
     private function getFlexpay(callable|MockResponse $mock): Client
     {
         $flexpay = new Client(new Credential('token', 'ZONDO'));
-        $reflection = new \ReflectionClass($flexpay);
+        $this->setValue($flexpay, 'http', new MockHttpClient($mock));
 
-        $http = $reflection->getProperty('http');
-        $http->setAccessible(true);
-        $http->setValue($flexpay, new MockHttpClient($mock));
-
+        /** @var Client $flexpay */
         return $flexpay;
     }
 
     private function getResponse(string $file): MockResponse
     {
         return new MockResponse((string) file_get_contents(__DIR__ . '/fixtures/' . $file));
+    }
+
+    private function setValue(object &$object, string $propertyName, mixed $value): void
+    {
+        $reflectionClass = new ReflectionClass($object);
+        $property = $reflectionClass->getProperty($propertyName);
+
+        if ($property->isReadOnly()) {
+            $mutable = $reflectionClass->newInstanceWithoutConstructor();
+
+            foreach ($reflectionClass->getProperties() as $classProperty) {
+                if ($classProperty->name === $propertyName) {
+                    continue;
+                }
+
+                if ($classProperty->isInitialized($object)) {
+                    $classProperty->setValue($mutable, $classProperty->getValue($object));
+                }
+            }
+
+            $object = $mutable;
+            $property = $reflectionClass->getProperty($propertyName);
+        }
+
+        $property->setValue($object, $value);
     }
 }

@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Devscast\Flexpay\Request;
 
 use Devscast\Flexpay\Data\Currency;
+use Override;
 use Webmozart\Assert\Assert;
 
 /**
@@ -39,8 +40,9 @@ final class CardRequest extends Request
      * Yeah, I know this is weird
      * But I'm not responsible for the API design.
      * so don't blame :D
+     * @return array<string, float|string|null>
      */
-    #[\Override]
+    #[Override]
     public function getPayload(): array
     {
         return [

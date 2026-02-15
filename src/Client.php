@@ -14,6 +14,7 @@ use Devscast\Flexpay\Response\CheckResponse;
 use Devscast\Flexpay\Response\FlexpayResponse;
 use Devscast\Flexpay\Response\PaymentResponse;
 use Devscast\Flexpay\Response\PayoutResponse;
+use RuntimeException;
 use Symfony\Component\HttpClient\HttpClient;
 use Symfony\Component\HttpClient\Retry\GenericRetryStrategy;
 use Symfony\Component\HttpClient\RetryableHttpClient;
@@ -23,21 +24,22 @@ use Symfony\Component\Serializer\Normalizer\ObjectNormalizer;
 use Symfony\Component\Serializer\Serializer;
 use Symfony\Contracts\HttpClient\Exception\HttpExceptionInterface;
 use Symfony\Contracts\HttpClient\HttpClientInterface;
+use Throwable;
 
 /**
  * Class Client.
  *
  * @author bernard-ng <bernard@devscast.tech>
  */
-final class Client
+final readonly class Client
 {
     private HttpClientInterface $http;
 
     private Serializer $serializer;
 
     public function __construct(
-        public readonly Credential $credential,
-        public readonly Environment $environment = Environment::SANDBOX,
+        public Credential $credential,
+        public Environment $environment = Environment::SANDBOX,
     ) {
         $this->serializer = new Serializer(
             normalizers: [
@@ -80,8 +82,8 @@ final class Client
             );
 
             return $response;
-        } catch (\Throwable $e) {
-            $this->createExceptionFromResponse($e);
+        } catch (Throwable $throwable) {
+            $this->createExceptionFromResponse($throwable);
         }
     }
 
@@ -108,8 +110,8 @@ final class Client
             );
 
             return $response;
-        } catch (\Throwable $e) {
-            $this->createExceptionFromResponse($e);
+        } catch (Throwable $throwable) {
+            $this->createExceptionFromResponse($throwable);
         }
     }
 
@@ -121,7 +123,7 @@ final class Client
         return match (true) {
             $request instanceof MobileRequest => $this->mobile($request),
             $request instanceof CardRequest => $this->card($request),
-            default => throw new \RuntimeException('Unsupported request')
+            default => throw new RuntimeException('Unsupported request')
         };
     }
 
@@ -145,8 +147,8 @@ final class Client
             );
 
             return $response;
-        } catch (\Throwable $e) {
-            $this->createExceptionFromResponse($e);
+        } catch (Throwable $throwable) {
+            $this->createExceptionFromResponse($throwable);
         }
     }
 
@@ -171,8 +173,8 @@ final class Client
             );
 
             return $response;
-        } catch (\Throwable $e) {
-            $this->createExceptionFromResponse($e);
+        } catch (Throwable $throwable) {
+            $this->createExceptionFromResponse($throwable);
         }
     }
 
@@ -201,7 +203,7 @@ final class Client
     /**
      * @throws NetworkException
      */
-    private function createExceptionFromResponse(\Throwable $exception): never
+    private function createExceptionFromResponse(Throwable $exception): never
     {
         if ($exception instanceof HttpExceptionInterface) {
             try {
@@ -213,7 +215,7 @@ final class Client
                     type: $body['error'],
                     status: $response->getStatusCode()
                 );
-            } catch (\Throwable $exception) {
+            } catch (Throwable $exception) {
                 throw new NetworkException($exception->getMessage());
             }
         } else {
