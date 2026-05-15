@@ -12,7 +12,7 @@ use Webmozart\Assert\Assert;
 /**
  * Class PayoutRequest.
  * * Cette classe gère les demandes de Payout (paiement vers un client).
- * Elle utilise des propriétés immuables (readonly) et valide le format 
+ * Elle utilise des propriétés immuables (readonly) et valide le format
  * du numéro de téléphone obligatoire pour ce flux.
  * * @author Rooney kalumba
  */
@@ -39,9 +39,9 @@ final class PayoutRequest extends Request
         Assert::length($this->phone, 12, 'The phone number should be 12 characters long, eg: 243123456789');
 
         parent::__construct(
-            amount: $amount, 
-            reference: $reference, 
-            currency: $currency, 
+            amount: $amount,
+            reference: $reference,
+            currency: $currency,
             callbackUrl: $callbackUrl
         );
     }
@@ -50,6 +50,7 @@ final class PayoutRequest extends Request
      * Génère le corps de la requête pour l'API Flexpay.
      * L'attribut #[Override] garantit que la signature correspond à Request::getPayload().
      * * @return array<string, float|string|null|int>
+     * @return array<string, float|string|null|int>
      */
     #[Override]
     public function getPayload(): array

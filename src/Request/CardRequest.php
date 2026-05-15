@@ -11,7 +11,7 @@ use Webmozart\Assert\Assert;
 /**
  * Class CardRequest.
  * * Cette classe gère les requêtes de paiement par carte (Visa/Mastercard).
- * Elle rend les URLs de redirection optionnelles pour plus de flexibilité, 
+ * Elle rend les URLs de redirection optionnelles pour plus de flexibilité,
  * tout en validant la cohérence des données.
  *
  * @author bernard-ng <bernard@devscast.tech>
@@ -43,7 +43,7 @@ final class CardRequest extends Request
     ) {
         // Validation de la référence (contrainte API Flexpay)
         Assert::lengthBetween($reference, 1, 25, 'The reference must be between 1 and 25 characters');
-        
+
         // On ne valide que si les champs ne sont pas vides (souplesse)
         // Mais on garde la structure métier cohérente
         parent::__construct(
@@ -51,8 +51,8 @@ final class CardRequest extends Request
             reference: $reference,
             currency: $currency,
             callbackUrl: $callbackUrl,
-            approveUrl: $approveUrl,
             description: $description,
+            approveUrl: $approveUrl,
             cancelUrl: $cancelUrl,
             declineUrl: $declineUrl
         );
@@ -62,6 +62,7 @@ final class CardRequest extends Request
      * Génère le payload pour l'API Card Payment.
      * Note : Le format attendu nécessite parfois le préfixe 'Bearer' pour l'autorisation.
      * * @return array<string, float|string|null>
+     * @return array<string, float|string|null>
      */
     #[Override]
     public function getPayload(): array

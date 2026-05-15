@@ -47,7 +47,7 @@ final class MobileRequest extends Request
         // Validation du format du numéro de téléphone
         Assert::length($this->phone, 12, 'The phone number should be 12 characters long, eg: 243123456789');
 
-        // Appel au parent en convertissant les nulls en chaînes vides ('') 
+        // Appel au parent en convertissant les nulls en chaînes vides ('')
         // pour éviter le TypeError avec Request::__construct
         parent::__construct(
             amount: $amount,
@@ -64,6 +64,7 @@ final class MobileRequest extends Request
     /**
      * Génère le payload pour l'API Mobile Money de Flexpay.
      * * @return array<string, float|string|int|null>
+     * @return array<string, float|string|int|null>
      */
     #[Override]
     public function getPayload(): array

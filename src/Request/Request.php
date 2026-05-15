@@ -56,7 +56,6 @@ abstract class Request
     /**
      * Définit les informations d'authentification de manière centralisée.
      * * @internal Cette méthode est utilisée par le Provider pour injecter les credentials.
-     * @param Credential $credential
      */
     public function setCredential(Credential $credential): void
     {
@@ -66,7 +65,6 @@ abstract class Request
 
     /**
      * Chaque type de requête doit implémenter sa propre logique de génération de payload.
-     * * @return array
      */
     abstract public function getPayload(): array;
 }

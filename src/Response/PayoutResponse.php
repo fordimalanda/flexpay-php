@@ -9,7 +9,7 @@ use Devscast\Flexpay\Data\Status;
 /**
  * Class PayoutResponse.
  * * Représente la réponse suite à une demande de Payout (versement vers un client).
- * Cette version est allégée : elle utilise le mapping automatique de Symfony 
+ * Cette version est allégée : elle utilise le mapping automatique de Symfony
  * pour la propriété orderNumber.
  *
  * @author bernard-ng <bernard@devscast.tech>
