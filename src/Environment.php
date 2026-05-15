@@ -18,6 +18,7 @@ enum Environment: string
 
     /**
      * Retourne l'URL pour les paiements par carte (Visa/Mastercard).
+     * Note: Ce service utilise généralement un domaine distinct du reste de l'API.
      */
     public function getCardPaymentUrl(): string
     {
@@ -45,7 +46,7 @@ enum Environment: string
 
     /**
      * Retourne l'URL pour les opérations de Payout (Sortie de fonds).
-     * Simplifié : la logique est identique pour les deux cas grâce à getBaseUrl().
+     * Le segment '/merchantPayOutService' est ajouté à la base de l'API.
      */
     public function getPayoutUrl(): string
     {
@@ -54,6 +55,7 @@ enum Environment: string
 
     /**
      * Centralise la base de l'API REST selon l'environnement.
+     * Utilisé pour Mobile Money, Check Status et Payout.
      */
     private function getBaseUrl(): string
     {
