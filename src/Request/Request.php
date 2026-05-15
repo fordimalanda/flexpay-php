@@ -4,69 +4,69 @@ declare(strict_types=1);
 
 namespace Devscast\Flexpay\Request;
 
+use Devscast\Flexpay\Credential;
 use Devscast\Flexpay\Data\Currency;
+use Webmozart\Assert\Assert;
 
 /**
- * Class CardRequest.
- * * Cette classe gère les requêtes de paiement par carte (Visa/Mastercard).
- * Elle étend la classe Request en rendant les URLs et la description optionnelles.
+ * Class Request
+ * * Classe de base abstraite pour toutes les requêtes de l'API Flexpay.
+ * Elle centralise les informations communes à chaque transaction.
  * * @author bernard-ng <bernard@devscast.tech>
  */
-class CardRequest extends Request
+abstract class Request
 {
     /**
-     * CardRequest constructor.
-     * * @param float $amount Le montant de la transaction
-     * @param string $reference La référence unique de la transaction
-     * @param Currency $currency La devise (CDF ou USD)
-     * @param string $callbackUrl L'URL de notification (Webhook)
-     * @param string $description Une description optionnelle
-     * @param string $approveUrl URL de redirection après succès
-     * @param string $cancelUrl URL de redirection après annulation
-     * @param string $declineUrl URL de redirection après échec
-     * @param string $homeUrl URL de retour à l'accueil du site marchand
+     * ID du marchand fourni par Flexpay
+     */
+    public ?string $merchant = null;
+
+    /**
+     * Jeton d'autorisation (Token)
+     */
+    public ?string $authorization = null;
+
+    /**
+     * Constructeur de base.
+     * * @param float $amount Montant de la transaction (doit être > 0)
+     * @param string $reference Référence unique de la transaction
+     * @param Currency $currency Devise (CDF ou USD)
+     * @param string $callbackUrl URL de notification (Webhook)
+     * @param string $description Description optionnelle
+     * @param string $approveUrl URL de retour après succès
+     * @param string $cancelUrl URL de retour après annulation
+     * @param string $declineUrl URL de retour après échec
      */
     public function __construct(
-        float $amount,
-        string $reference,
-        Currency $currency,
-        string $callbackUrl,
-        string $description = '',
-        string $approveUrl = '',
-        string $cancelUrl = '',
-        string $declineUrl = '',
-        public string $homeUrl = ''
+        public readonly float $amount,
+        public readonly string $reference,
+        public readonly Currency $currency,
+        public readonly string $callbackUrl,
+        public readonly string $description = '',
+        public readonly string $approveUrl = '',
+        public readonly string $cancelUrl = '',
+        public readonly string $declineUrl = '',
     ) {
-        parent::__construct(
-            amount: $amount,
-            reference: $reference,
-            currency: $currency,
-            callbackUrl: $callbackUrl,
-            approveUrl: $approveUrl,
-            description: $description,
-            cancelUrl: $cancelUrl,
-            declineUrl: $declineUrl
-        );
+        // Validations de base communes à tous les flux
+        Assert::greaterThan($this->amount, 0, 'The transaction amount should be greater than 0');
+        Assert::notEmpty($this->reference, 'The transaction reference is mandatory');
+        Assert::notEmpty($this->callbackUrl, 'The callback (webhook) url must be provided');
     }
 
     /**
-     * Génère le corps de la requête pour l'API Flexpay.
-     * Les clés correspondent aux attentes de la passerelle de carte.
+     * Définit les informations d'authentification de manière centralisée.
+     * * @internal Cette méthode est utilisée par le Provider pour injecter les credentials.
+     * @param Credential $credential
+     */
+    public function setCredential(Credential $credential): void
+    {
+        $this->merchant = $credential->merchant;
+        $this->authorization = $credential->token;
+    }
+
+    /**
+     * Chaque type de requête doit implémenter sa propre logique de génération de payload.
      * * @return array
      */
-    public function getPayload(): array
-    {
-        return [
-            'merchant' => $this->merchant,
-            'reference' => $this->reference,
-            'amount' => $this->amount,
-            'currency' => $this->currency->value,
-            'description' => $this->description,
-            'callback_url' => $this->callbackUrl,
-            'approve_url' => $this->approveUrl,
-            'cancel_url' => $this->cancelUrl,
-            'decline_url' => $this->declineUrl,
-            'home_url' => $this->homeUrl,
-        ];
-    }
+    abstract public function getPayload(): array;
 }
