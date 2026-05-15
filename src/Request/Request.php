@@ -4,49 +4,69 @@ declare(strict_types=1);
 
 namespace Devscast\Flexpay\Request;
 
-use Devscast\Flexpay\Credential;
 use Devscast\Flexpay\Data\Currency;
-use Webmozart\Assert\Assert;
 
 /**
- * Class Request.
- *
- * @author bernard-ng <bernard@devscast.tech>
+ * Class CardRequest.
+ * * Cette classe gère les requêtes de paiement par carte (Visa/Mastercard).
+ * Elle étend la classe Request en rendant les URLs et la description optionnelles.
+ * * @author bernard-ng <bernard@devscast.tech>
  */
-abstract class Request
+class CardRequest extends Request
 {
-    public ?string $merchant = null;
-
-    public ?string $authorization = null;
-
+    /**
+     * CardRequest constructor.
+     * * @param float $amount Le montant de la transaction
+     * @param string $reference La référence unique de la transaction
+     * @param Currency $currency La devise (CDF ou USD)
+     * @param string $callbackUrl L'URL de notification (Webhook)
+     * @param string $description Une description optionnelle
+     * @param string $approveUrl URL de redirection après succès
+     * @param string $cancelUrl URL de redirection après annulation
+     * @param string $declineUrl URL de redirection après échec
+     * @param string $homeUrl URL de retour à l'accueil du site marchand
+     */
     public function __construct(
-        public readonly float $amount,
-        public readonly string $reference,
-        public readonly Currency $currency,
-        public readonly string $callbackUrl,
-        public readonly ?string $approveUrl = null,
-        public readonly ?string $description = null,
-        public readonly ?string $cancelUrl = null,
-        public readonly ?string $declineUrl = null,
+        float $amount,
+        string $reference,
+        Currency $currency,
+        string $callbackUrl,
+        string $description = '',
+        string $approveUrl = '',
+        string $cancelUrl = '',
+        string $declineUrl = '',
+        public string $homeUrl = ''
     ) {
-        Assert::greaterThan($this->amount, 0, 'The transaction amount should be greater than 0');
-        Assert::notEmpty($this->reference, 'The transaction reference is mandatory');
-        Assert::oneOf($this->currency, Currency::cases(), 'Unsupported currency');
-        Assert::notEmpty($this->callbackUrl, 'The callback (webhook) url must be provided');
+        parent::__construct(
+            amount: $amount,
+            reference: $reference,
+            currency: $currency,
+            callbackUrl: $callbackUrl,
+            approveUrl: $approveUrl,
+            description: $description,
+            cancelUrl: $cancelUrl,
+            declineUrl: $declineUrl
+        );
     }
 
     /**
-     * @internal
-     *
-     * Cette méthode est utilisée pour définir les informations d'authentification.
-     * Elle est définie ici pour éviter de passer par le constructeur
-     * et rajouter de la complexité pour le développeur final
+     * Génère le corps de la requête pour l'API Flexpay.
+     * Les clés correspondent aux attentes de la passerelle de carte.
+     * * @return array
      */
-    public function setCredential(Credential $credential): void
+    public function getPayload(): array
     {
-        $this->merchant = $credential->merchant;
-        $this->authorization = $credential->token;
+        return [
+            'merchant' => $this->merchant,
+            'reference' => $this->reference,
+            'amount' => $this->amount,
+            'currency' => $this->currency->value,
+            'description' => $this->description,
+            'callback_url' => $this->callbackUrl,
+            'approve_url' => $this->approveUrl,
+            'cancel_url' => $this->cancelUrl,
+            'decline_url' => $this->declineUrl,
+            'home_url' => $this->homeUrl,
+        ];
     }
-
-    abstract public function getPayload(): array;
 }
