@@ -6,6 +6,8 @@ namespace Devscast\Flexpay;
 
 /**
  * Class Environment.
+ * * Définit les environnements de travail (Production ou Sandbox)
+ * et centralise la gestion des URLs des différents services Flexpay.
  *
  * @author bernard-ng <bernard@devscast.tech>
  */
@@ -14,6 +16,9 @@ enum Environment: string
     case LIVE = 'prod';
     case SANDBOX = 'dev';
 
+    /**
+     * Retourne l'URL pour les paiements par carte (Visa/Mastercard).
+     */
     public function getCardPaymentUrl(): string
     {
         return match ($this) {
@@ -22,28 +27,34 @@ enum Environment: string
         };
     }
 
+    /**
+     * Retourne l'URL pour les paiements Mobile Money.
+     */
     public function getMobilePaymentUrl(): string
     {
-        return match ($this) {
-            self::LIVE, self::SANDBOX => sprintf('%s/paymentService', $this->getBaseUrl()),
-        };
+        return sprintf('%s/paymentService', $this->getBaseUrl());
     }
 
+    /**
+     * Retourne l'URL de vérification de statut d'une transaction.
+     */
     public function getCheckStatusUrl(string $orderNumber): string
     {
-        return match ($this) {
-            self::LIVE, self::SANDBOX => sprintf('%s/check/%s', $this->getBaseUrl(), $orderNumber),
-        };
+        return sprintf('%s/check/%s', $this->getBaseUrl(), $orderNumber);
     }
 
+    /**
+     * Retourne l'URL pour les opérations de Payout (Sortie de fonds).
+     * Simplifié : la logique est identique pour les deux cas grâce à getBaseUrl().
+     */
     public function getPayoutUrl(): string
     {
-        return match ($this) {
-            self::LIVE => sprintf('%s/merchantPayOutService', $this->getBaseUrl()),
-            self::SANDBOX => sprintf('%s/merchantPayOutService', $this->getBaseUrl()),
-        };
+        return sprintf('%s/merchantPayOutService', $this->getBaseUrl());
     }
 
+    /**
+     * Centralise la base de l'API REST selon l'environnement.
+     */
     private function getBaseUrl(): string
     {
         return match ($this) {
